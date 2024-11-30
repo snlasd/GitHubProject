@@ -2,15 +2,24 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [SerializeField]
+    private float moveSpeed = 7f;
+    [SerializeField]
+    private float rotateSpeed = 15f;
+    [SerializeField]
+    private GameInput gameInput;
+    private bool isWalking;
+    private void Update()
     {
-        
-    }
+        Vector2 inputVector = gameInput.GetMovementVectorNormalized();
 
-    // Update is called once per frame
-    void Update()
+        Vector3 moveDir = new Vector3(inputVector.x, 0f, inputVector.y);
+        transform.position += moveDir * moveSpeed * Time.deltaTime ;
+        isWalking = moveDir != Vector3.zero;
+        transform.forward = Vector3.Slerp(transform.forward,moveDir,Time.deltaTime * rotateSpeed);
+    }
+    public bool IsWalking()
     {
-        
+        return isWalking;
     }
 }
