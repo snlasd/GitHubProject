@@ -1,7 +1,37 @@
+using System;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+
+    public static Player Instance { get; private set; }
+
+    //private static Player instance;
+    //public static Player Instance
+    //{
+    //    get { return instance; }
+    //    set { instance = value; }
+    //}
+
+    //public static Player instanceField;
+    //public static Player GetInstanceField()
+    //{
+    //    return instanceField;
+    //}
+    //public static void SetInstanceField(Player instanceField)
+    //{
+    //    Player.instanceField = instanceField;
+    //}
+
+
+
+    public event EventHandler <OnSelectedCounterChangedEventArgs> OnSelectedCounterChanged;
+    public class OnSelectedCounterChangedEventArgs : EventArgs
+    {
+        public ClearCounter selectedCounter;
+
+    }
+
     [SerializeField]
     private float moveSpeed = 7f;
     [SerializeField]
@@ -12,8 +42,35 @@ public class Player : MonoBehaviour
     private float playerRadius = .7f;
     [SerializeField]
     private float playerHeight = 2f;
+    [SerializeField]
+    private LayerMask countersLayerMask;
 
     private bool isWalking;
+    private Vector3 lastInteractDir;
+    private ClearCounter SelectedCounter;
+
+    private void Awake()
+    {
+        if (Instance != null)
+        {
+            Debug.LogError("there is ");
+        }
+        Instance = this;
+    }
+
+    private void Start()
+    {
+        gameInput.OnInteractAction += GameInput_OnInteractAction; ;
+    }
+
+    private void GameInput_OnInteractAction(object sender, System.EventArgs e)
+    {
+        if (SelectedCounter != null) { 
+            SelectedCounter.Interact();
+        }
+
+    }
+
     private void Update()
     {
         HandleInteractions();
@@ -29,13 +86,35 @@ public class Player : MonoBehaviour
 
         Vector3 moveDir = new Vector3(inputVector.x, 0f, inputVector.y);
 
-        if (Physics.Raycast(transform.position, moveDir,out RaycastHit raycastHit, 2f))
+        if (moveDir != Vector3.zero)
         {
-            Debug.Log(raycastHit.transform);
+            lastInteractDir = moveDir;
+        }
+        if (Physics.Raycast(transform.position, lastInteractDir, out RaycastHit raycastHit, 2f, countersLayerMask))
+        {
+            
+            // Debug.Log(raycastHit.transform);
+            if (raycastHit.transform.TryGetComponent(out ClearCounter clearCounter))
+            {
+                if (clearCounter != SelectedCounter)
+                {
+                    SetSelectedCounter(clearCounter);
+                }
+            }
+            else
+            {
+                SetSelectedCounter(null);
+            }
+            // caranya sama cuman di atas lebih gampang aja di baca
+            //if (raycastHit.transform.GetComponent<ClearCounter>() != null)
+            //{
+
+            //}
         }
         else
         {
-            Debug.Log("-");
+            SetSelectedCounter(null);
+
         }
     }
     private void HandleMovement()
@@ -78,5 +157,15 @@ public class Player : MonoBehaviour
         }
         isWalking = moveDir != Vector3.zero;
         transform.forward = Vector3.Slerp(transform.forward, moveDir, Time.deltaTime * rotateSpeed);
+    }
+
+    private void SetSelectedCounter(ClearCounter selectedCounter)
+    {
+        this.SelectedCounter = selectedCounter;
+
+        OnSelectedCounterChanged?.Invoke(this, new OnSelectedCounterChangedEventArgs
+        {
+            selectedCounter = SelectedCounter
+        });
     }
 }
