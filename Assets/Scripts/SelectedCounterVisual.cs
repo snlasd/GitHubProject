@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class SelectedCounterVisuak : MonoBehaviour
+public class SelectedCounterVisual : MonoBehaviour
 {
 
     [SerializeField] private ClearCounter clearCounter;
