@@ -1,27 +1,17 @@
-using System.Net.Http.Headers;
 using UnityEngine;
 
-public class ClearCounter : MonoBehaviour,IKitchenObjectParent
+public class BaseCounter : MonoBehaviour, IKitchenObjectParent
 {
-    [SerializeField] private KitchenObjectSO kitchenObjectSO;
     [SerializeField] private Transform counterTopPoint;
 
     private KitchenObject kitchenObject;
 
-
-    public void Interact(Player player)
+    public virtual void Interact(Player player) {
+        Debug.LogError("BaseCounter.Interact();");
+    }
+    public virtual void InteractAlternate(Player player)
     {
-        if (kitchenObject == null)
-        {
-
-            Transform kitchenObjectTransform = Instantiate(kitchenObjectSO.prefab, counterTopPoint);
-            kitchenObjectTransform.GetComponent<KitchenObject>().SetKitchenObjectParent(this);
-        }
-        else
-        {
-            kitchenObject.SetKitchenObjectParent(player);
-        }
-
+        Debug.LogError("BaseCounter.InteractAlternate();");
     }
     public Transform GetKitchenObjectFollowTransform()
     {
